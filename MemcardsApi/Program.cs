@@ -1,5 +1,7 @@
 
 
+using MemcardsApi.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
@@ -20,6 +22,17 @@ app.MapGet("decks/{deckId}", (string deckId) =>
     return Results.NotFound();
   }
   return TypedResults.Ok(deck);
+});
+
+app.MapPut("/decks/{deckId}", (string deckId, DeckName deckName) =>
+{
+  var existingDeck = decks.FirstOrDefault((deck) => deck.Id == deckId);
+  if (existingDeck == null)
+  {
+    return Results.NotFound();
+  }
+  existingDeck.Name = deckName.Name;
+  return TypedResults.Ok(existingDeck);
 });
 
 app.Run();

@@ -57,4 +57,14 @@ public class HelloWorldTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
+    [Fact]
+    public async Task TestUpdateDeck()
+    {
+        var response = await client.PutAsJsonAsync("/decks/deck-1", new { Name = "Updated Name" });
+
+        var responseData = await response.Content.ReadFromJsonAsync<Deck>();
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        responseData.Should().NotBeNull();
+        Assert.Equal("Updated Name", responseData?.Name);
+    }
 }
