@@ -2,32 +2,25 @@ namespace MemcardsTests;
 
 using System.Net.Http.Json;
 using MemcardsApi.Models;
-using Microsoft.AspNetCore.Mvc.Testing;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using System.Net;
+using Microsoft.AspNetCore.Mvc.Testing;
 
-public class HelloWorldTests : IClassFixture<WebApplicationFactory<Program>>
+public class GetDeckTests : IClassFixture<WebApplicationFactory<Program>>
 {
-    private readonly HttpClient client;
+    private readonly WebApplicationFactory<Program> _factory;
 
-    public HelloWorldTests(WebApplicationFactory<Program> factory)
+    public GetDeckTests(WebApplicationFactory<Program> factory)
     {
-        client = factory.CreateClient();
-    }
+        _factory = factory;
 
-    [Fact]
-    public async Task TestRootEndpoint()
-    {
-        var response = await client.GetStringAsync("/");
-
-        Assert.Equal("Hello World!", response);
     }
 
     [Fact]
     public async Task TestGetDecks()
     {
-        var response = await client.GetAsync("/decks");
+        var response = await _factory.CreateClient().GetAsync("/decks");
         var responseData = await response.Content.ReadFromJsonAsync<List<Deck>>();
         Assert.True(response.IsSuccessStatusCode);
         Assert.Equal("Capitals", responseData?[0].Name);
@@ -37,7 +30,7 @@ public class HelloWorldTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task TestGetDeck()
     {
         var testDeck = MemcardsApi.TestDataGenerator.Generate()[0];
-        var response = await client.GetAsync("/decks/deck-1");
+        var response = await _factory.CreateClient().GetAsync("/decks/deck-1");
         var responseData = await response.Content.ReadFromJsonAsync<Deck>();
         Assert.True(response.IsSuccessStatusCode);
         Assert.Equal("Capitals", responseData?.Name);
@@ -52,19 +45,8 @@ public class HelloWorldTests : IClassFixture<WebApplicationFactory<Program>>
     [Fact]
     public async Task TestGetDeckNotFound()
     {
-        var response = await client.GetAsync("/decks/bad-id");
+        var response = await _factory.CreateClient().GetAsync("/decks/bad-id");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task TestUpdateDeck()
-    {
-        var response = await client.PutAsJsonAsync("/decks/deck-1", new { Name = "Updated Name" });
-
-        var responseData = await response.Content.ReadFromJsonAsync<Deck>();
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        responseData.Should().NotBeNull();
-        Assert.Equal("Updated Name", responseData?.Name);
     }
 }
