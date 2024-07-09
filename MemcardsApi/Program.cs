@@ -66,6 +66,16 @@ app.MapPut("/decks/{deckId}/flashcards/{flashcardId}", (string deckId, string fl
   return TypedResults.Ok(updatedFlashcard);
 });
 
+app.MapDelete("/decks/{deckId}/flashcards/{flashcardId}", (string deckId, string flashcardId, IDbService service) =>
+{
+  var flashcard = service.DeleteFlashcard(deckId, flashcardId);
+  if (flashcard.Equals(0))
+  {
+    return Results.NotFound();
+  }
+  return Results.NoContent();
+});
+
 app.Run();
 
 

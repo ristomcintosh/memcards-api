@@ -13,6 +13,8 @@ public interface IDbService
   Flashcard? CreateFlashcard(string deckId, Flashcard flashcard);
 
   Flashcard? UpdateFlashcard(string deckId, string flashcardId, Flashcard flashcard);
+
+  int DeleteFlashcard(string deckId, string flashcardId);
 }
 
 
@@ -74,5 +76,15 @@ public class InMemoryDB : IDbService
     existingFlashcard.Front = flashcard.Front;
     existingFlashcard.Back = flashcard.Back;
     return existingFlashcard;
+  }
+
+  public int DeleteFlashcard(string deckId, string flashcardId)
+  {
+    var deck = decks.FirstOrDefault((deck) => deck.Id == deckId);
+    if (deck == null) return 0;
+    var flashcard = deck.Flashcards.FirstOrDefault((flashcard) => flashcard.Id == flashcardId);
+    if (flashcard == null) return 0;
+    deck.Flashcards.Remove(flashcard);
+    return 1;
   }
 }
