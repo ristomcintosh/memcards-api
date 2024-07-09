@@ -56,7 +56,15 @@ app.MapPost("/decks/{deckId}/flashcards", (string deckId, Flashcard flashcard, I
 
 });
 
-
+app.MapPut("/decks/{deckId}/flashcards/{flashcardId}", (string deckId, string flashcardId, Flashcard flashcard, IDbService service) =>
+{
+  var updatedFlashcard = service.UpdateFlashcard(deckId, flashcardId, flashcard);
+  if (updatedFlashcard == null)
+  {
+    return Results.NotFound();
+  }
+  return TypedResults.Ok(updatedFlashcard);
+});
 
 app.Run();
 
