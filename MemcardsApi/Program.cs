@@ -34,6 +34,16 @@ app.MapPut("/decks/{deckId}", (string deckId, DeckName deckName, IDbService serv
   return TypedResults.Ok(existingDeck);
 });
 
+app.MapDelete("/decks/{deckId}", (string deckId, IDbService service) =>
+{
+  var deck = service.DeleteDeck(deckId);
+  if (deck.Equals(0))
+  {
+    return Results.NotFound();
+  }
+  return Results.NoContent();
+});
+
 app.Run();
 
 
