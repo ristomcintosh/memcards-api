@@ -9,6 +9,8 @@ public interface IDbService
   List<Deck> GetDecks();
 
   int DeleteDeck(string deckId);
+
+  Flashcard? CreateFlashcard(string deckId, Flashcard flashcard);
 }
 
 
@@ -49,5 +51,15 @@ public class InMemoryDB : IDbService
       return 1;
     };
     return 0;
+  }
+
+  public Flashcard? CreateFlashcard(string deckId, Flashcard flashcard)
+  {
+    var deck = decks.FirstOrDefault((deck) => deck.Id == deckId);
+
+    if (deck == null) return null;
+    var newFlashcard = new Flashcard(Guid.NewGuid().ToString(), flashcard.Front, flashcard.Back, deckId);
+    deck.Flashcards.Add(newFlashcard);
+    return newFlashcard;
   }
 }

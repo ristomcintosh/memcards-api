@@ -1,0 +1,18 @@
+meta {
+  name: Create Flashcard
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:5245/decks/deck-1/flashcards
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "Front": "Front Test",
+    "Back": "Back Test"
+  }
+}

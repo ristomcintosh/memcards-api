@@ -44,6 +44,20 @@ app.MapDelete("/decks/{deckId}", (string deckId, IDbService service) =>
   return Results.NoContent();
 });
 
+app.MapPost("/decks/{deckId}/flashcards", (string deckId, Flashcard flashcard, IDbService service) =>
+{
+  var createdFlashcard = service.CreateFlashcard(deckId, flashcard);
+  if (createdFlashcard == null)
+  {
+    return Results.NotFound();
+  }
+
+  return Results.Created("", createdFlashcard);
+
+});
+
+
+
 app.Run();
 
 
