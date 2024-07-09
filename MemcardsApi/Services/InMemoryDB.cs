@@ -10,6 +10,8 @@ public interface IDbService
 
   int DeleteDeck(string deckId);
 
+  Deck CreateDeck(Deck deck);
+
   Flashcard? CreateFlashcard(string deckId, Flashcard flashcard);
 
   Flashcard? UpdateFlashcard(string deckId, string flashcardId, Flashcard flashcard);
@@ -44,6 +46,13 @@ public class InMemoryDB : IDbService
     }
     existingDeck.Name = deckName.Name;
     return existingDeck;
+  }
+
+  public Deck CreateDeck(Deck deck)
+  {
+    var newDeck = new Deck(Guid.NewGuid().ToString(), deck.Name);
+    decks.Add(newDeck);
+    return newDeck;
   }
 
   public int DeleteDeck(string deckId)

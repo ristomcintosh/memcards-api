@@ -1,0 +1,17 @@
+meta {
+  name: Create Deck
+  type: http
+  seq: 8
+}
+
+post {
+  url: http://localhost:5245/decks
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "Name": "New Deck!"
+  }
+}

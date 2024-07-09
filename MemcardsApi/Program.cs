@@ -24,6 +24,12 @@ app.MapGet("decks/{deckId}", (string deckId, IDbService service) =>
   return TypedResults.Ok(deck);
 });
 
+app.MapPost("/decks", (Deck deck, IDbService service) =>
+{
+  var createdDeck = service.CreateDeck(deck);
+  return Results.Created($"/decks/{createdDeck.Id}", createdDeck);
+});
+
 app.MapPut("/decks/{deckId}", (string deckId, DeckName deckName, IDbService service) =>
 {
   var existingDeck = service.UpdateDeck(deckId, deckName);
