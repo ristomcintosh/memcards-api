@@ -12,6 +12,7 @@ func main() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", whatUpHandler)
+	r.HandleFunc("/decks", GetDecks)
 
 	fmt.Println("severing on port 5757")
 	log.Fatal(http.ListenAndServe(":5757", r))
