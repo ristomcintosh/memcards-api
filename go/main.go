@@ -13,6 +13,7 @@ func main() {
 
 	r.HandleFunc("/", whatUpHandler)
 	r.HandleFunc("/decks", GetDecks)
+	r.HandleFunc("/decks/{deckId}", GetDeck)
 
 	fmt.Println("severing on port 5757")
 	log.Fatal(http.ListenAndServe(":5757", r))

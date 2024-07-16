@@ -2,7 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 var decks = []Deck{
@@ -35,4 +38,32 @@ func GetDecks(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+}
+
+func GetDeck(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["deckId"]
+
+	deck := findById(id, decks)
+
+	if deck == nil {
+		w.WriteHeader(http.StatusNotFound)
+		message := fmt.Sprintf("Deck: %v not found", id)
+		w.Write([]byte(message))
+		return
+	}
+
+	err := json.NewEncoder(w).Encode(deck)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func findById(deckId string, decks []Deck) *Deck {
+	for _, deck := range decks {
+		if deck.Id == deckId {return &deck}
+	}
+	return nil
 }
