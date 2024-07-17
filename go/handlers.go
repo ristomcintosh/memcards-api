@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -59,6 +60,27 @@ func GetDeck(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+}
+
+type CreateDeckInput struct {
+ Name string `json:"name"`
+}
+
+func CreateDeck(w http.ResponseWriter, r *http.Request) {
+	var req CreateDeckInput
+
+	json.NewDecoder(r.Body).Decode(&req)
+
+	newDeck := Deck{
+		Id: uuid.New().String(),
+		Name: req.Name,
+		Flashcards: []Flashcard{},
+	}
+
+	decks = append(decks, newDeck)
+
+	json.NewEncoder(w).Encode(newDeck)
+	w.WriteHeader(http.StatusCreated)
 }
 
 func findById(deckId string, decks []Deck) *Deck {
