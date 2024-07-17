@@ -30,6 +30,8 @@ var flashcards2 = []Flashcard{
 	{Id: "10", Front: "Goodbye", Back: "Adeus", DeckId: "2"},
 }
 
+var deckRepository = Repository[Deck]{decks}
+
 func GetDecks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -45,7 +47,7 @@ func GetDeck(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["deckId"]
 
-	deck := findById(id, decks)
+	deck := deckRepository.FindById(id)
 
 	if deck == nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -108,7 +110,7 @@ func UpdateDeck(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["deckId"]
 
-	deck := findById(id, decks)
+	deck := deckRepository.FindById(id)
 
 	if deck == nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -121,11 +123,4 @@ func UpdateDeck(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(deck)
-}
-
-func findById(deckId string, decks []Deck) *Deck {
-	for i, deck := range decks {
-		if deck.Id == deckId {return &decks[i]}
-	}
-	return nil
 }
