@@ -4,21 +4,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
+type application struct {}
+
 func main() {
-	r := mux.NewRouter()
+	app := application{}
 
-	r.HandleFunc("/", whatUpHandler)
-	r.HandleFunc("/decks", GetDecks)
-	r.HandleFunc("/decks/{deckId}", GetDeck)
+	handlers := app.routes()
 
-	fmt.Println("severing on port 5757")
-	log.Fatal(http.ListenAndServe(":5757", r))
-}
-
-func whatUpHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("What up"))
+	fmt.Println("listening on port 5757")
+	log.Fatal(http.ListenAndServe(":5757", handlers))
 }
