@@ -71,6 +71,12 @@ func CreateDeck(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&req)
 
+	if req.Name == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("name is required"))
+		return
+	}
+
 	newDeck := Deck{
 		Id: uuid.New().String(),
 		Name: req.Name,
@@ -79,13 +85,47 @@ func CreateDeck(w http.ResponseWriter, r *http.Request) {
 
 	decks = append(decks, newDeck)
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(newDeck)
 	w.WriteHeader(http.StatusCreated)
 }
 
+type UpdateDeckInput struct {
+	Name string `json:"name"`
+}
+
+func UpdateDeck(w http.ResponseWriter, r *http.Request) {
+	var req UpdateDeckInput
+
+	json.NewDecoder(r.Body).Decode(&req)
+
+	if req.Name == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("name is required"))
+		return
+	}
+
+	vars := mux.Vars(r)
+	id := vars["deckId"]
+
+	deck := findById(id, decks)
+
+	if deck == nil {
+		w.WriteHeader(http.StatusNotFound)
+		message := fmt.Sprintf("Deck: %v not found", id)
+		w.Write([]byte(message))
+		return
+	}
+
+	deck.Name = req.Name
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(deck)
+}
+
 func findById(deckId string, decks []Deck) *Deck {
-	for _, deck := range decks {
-		if deck.Id == deckId {return &deck}
+	for i, deck := range decks {
+		if deck.Id == deckId {return &decks[i]}
 	}
 	return nil
 }
