@@ -35,7 +35,7 @@ var deckRepository = Repository[Deck]{decks}
 func GetDecks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	err := json.NewEncoder(w).Encode(decks)
+	err := json.NewEncoder(w).Encode(deckRepository.items)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -85,7 +85,7 @@ func CreateDeck(w http.ResponseWriter, r *http.Request) {
 		Flashcards: []Flashcard{},
 	}
 
-	decks = append(decks, newDeck)
+	deckRepository.Create(newDeck)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(newDeck)
@@ -123,4 +123,42 @@ func UpdateDeck(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(deck)
+}
+
+type createFlashcardInput struct {
+	Front string `json:"front"`
+	Back string `json:"back"`
+}
+
+func CreateFlashcard(w http.ResponseWriter, r *http.Request) {
+	var reqBody createFlashcardInput
+	vars := mux.Vars(r)
+	deckId := vars["deckId"]
+
+	json.NewDecoder(r.Body).Decode(&reqBody)
+
+	// TODO add validation
+
+
+
+	var deck = deckRepository.FindById(deckId)
+
+	if deck == nil {
+		w.WriteHeader(http.StatusNotFound)
+		message := fmt.Sprintf("Deck: %v not found", deckId)
+		w.Write([]byte(message))
+		return
+	}
+
+	newFlashcard := Flashcard{
+		Id: uuid.New().String(),
+		Front: reqBody.Front,
+		Back: reqBody.Back,
+		DeckId: deckId,
+	}
+
+	deck.Flashcards = append(deck.Flashcards, newFlashcard)
+
+	json.NewEncoder(w).Encode(newFlashcard)
+	w.WriteHeader(http.StatusCreated)
 }

@@ -15,6 +15,10 @@ func (r *Repository[T]) FindById(id string) *T {
 	return nil
 }
 
+func (r *Repository[T]) Create(newItem T) {
+	r.items = append(r.items, newItem)
+}
+
 type Deck struct {
 	Id string `json:"id"`
 	Name string `json:"name"`
