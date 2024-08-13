@@ -2,33 +2,34 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	"net/http"
 
-	"github.com/google/uuid"
-	"github.com/gorilla/mux"
+	// "github.com/google/uuid"
+	// "github.com/gorilla/mux"
+	"gorm.io/gorm"
 )
 
 var decks = []Deck{
-	{Id: "1", Name: "World Capitals", Flashcards: flashcards1},
-	{Id: "2", Name: "Basic Portuguese", Flashcards: flashcards2},
+	{Name: "World Capitals"},
+	{Name: "Basic Portuguese"},
 }
 
-var flashcards1 = []Flashcard{
-	{Id: "1", Front: "France", Back: "Paris", DeckId: "1"},
-	{Id: "2", Front: "Japan", Back: "Tokyo", DeckId: "1"},
-	{Id: "3", Front: "Italy", Back: "Rome", DeckId: "1"},
-	{Id: "4", Front: "Brazil", Back: "Brasilia", DeckId: "1"},
-	{Id: "5", Front: "Canada", Back: "Ottawa", DeckId: "1"},
-}
+// var flashcards1 = []Flashcard{
+// 	{Front: "France", Back: "Paris", DeckID: "1"},
+// 	{Front: "Japan", Back: "Tokyo", DeckID: "1"},
+// 	{Front: "Italy", Back: "Rome", DeckID: "1"},
+// 	{Front: "Brazil", Back: "Brasilia", DeckID: "1"},
+// 	{Front: "Canada", Back: "Ottawa", DeckID: "1"},
+// }
 
-var flashcards2 = []Flashcard{
-	{Id: "6", Front: "Hello", Back: "Olá", DeckId: "2"},
-	{Id: "7", Front: "Thank you", Back: "Obrigado", DeckId: "2"},
-	{Id: "8", Front: "Yes", Back: "Sim", DeckId: "2"},
-	{Id: "9", Front: "No", Back: "Não", DeckId: "2"},
-	{Id: "10", Front: "Goodbye", Back: "Adeus", DeckId: "2"},
-}
+// var flashcards2 = []Flashcard{
+// 	{Front: "Hello", Back: "Olá", DeckID: "2"},
+// 	{Front: "Thank you", Back: "Obrigado", DeckID: "2"},
+// 	{Front: "Yes", Back: "Sim", DeckID: "2"},
+// 	{Front: "No", Back: "Não", DeckID: "2"},
+// 	{Front: "Goodbye", Back: "Adeus", DeckID: "2"},
+// }
 
 var deckRepository = Repository[Deck]{decks}
 
@@ -37,149 +38,154 @@ type APIResponse struct {
 	Errors  []string
 }
 
-func GetDecks(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	err := json.NewEncoder(w).Encode(deckRepository.items)
+func GetDecks(db *gorm.DB) http.HandlerFunc {
 
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		var decks []Deck
+		db.Model(&Deck{}).Preload("Flashcards").Find(&decks)
+		err := json.NewEncoder(w).Encode(decks)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
-func GetDeck(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["deckId"]
+// func GetDeck(w http.ResponseWriter, r *http.Request) {
+// 	vars := mux.Vars(r)
+// 	id := vars["deckId"]
 
-	deck := deckRepository.FindById(id)
+// 	deck := deckRepository.FindById(id)
 
-	if deck == nil {
-		w.WriteHeader(http.StatusNotFound)
-		message := fmt.Sprintf("Deck: %v not found", id)
-		w.Write([]byte(message))
-		return
-	}
+// 	if deck == nil {
+// 		w.WriteHeader(http.StatusNotFound)
+// 		message := fmt.Sprintf("Deck: %v not found", id)
+// 		w.Write([]byte(message))
+// 		return
+// 	}
 
-	err := json.NewEncoder(w).Encode(deck)
+// 	err := json.NewEncoder(w).Encode(deck)
 
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
+// 	if err != nil {
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		return
+// 	}
+// }
 
-type CreateDeckInput struct {
-	Name string `json:"name"`
-}
+// type CreateDeckInput struct {
+// 	Name string `json:"name"`
+// }
 
-func CreateDeck(w http.ResponseWriter, r *http.Request) {
-	var req CreateDeckInput
+// func CreateDeck(w http.ResponseWriter, r *http.Request) {
+// 	var req CreateDeckInput
 
-	json.NewDecoder(r.Body).Decode(&req)
+// 	json.NewDecoder(r.Body).Decode(&req)
 
-	if req.Name == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("name is required"))
-		return
-	}
+// 	if req.Name == "" {
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		w.Write([]byte("name is required"))
+// 		return
+// 	}
 
-	newDeck := Deck{
-		Id:         uuid.New().String(),
-		Name:       req.Name,
-		Flashcards: []Flashcard{},
-	}
+// 	newDeck := Deck{
+// 		Id:         uuid.New().String(),
+// 		Name:       req.Name,
+// 		Flashcards: []Flashcard{},
+// 	}
 
-	deckRepository.Create(newDeck)
+// 	deckRepository.Create(newDeck)
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(newDeck)
-	w.WriteHeader(http.StatusCreated)
-}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	json.NewEncoder(w).Encode(newDeck)
+// 	w.WriteHeader(http.StatusCreated)
+// }
 
-type UpdateDeckInput struct {
-	Name string `json:"name"`
-}
+// type UpdateDeckInput struct {
+// 	Name string `json:"name"`
+// }
 
-func UpdateDeck(w http.ResponseWriter, r *http.Request) {
-	var req UpdateDeckInput
+// func UpdateDeck(w http.ResponseWriter, r *http.Request) {
+// 	var req UpdateDeckInput
 
-	json.NewDecoder(r.Body).Decode(&req)
+// 	json.NewDecoder(r.Body).Decode(&req)
 
-	if req.Name == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("name is required"))
-		return
-	}
+// 	if req.Name == "" {
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		w.Write([]byte("name is required"))
+// 		return
+// 	}
 
-	vars := mux.Vars(r)
-	id := vars["deckId"]
+// 	vars := mux.Vars(r)
+// 	id := vars["deckId"]
 
-	deck := deckRepository.FindById(id)
+// 	deck := deckRepository.FindById(id)
 
-	if deck == nil {
-		w.WriteHeader(http.StatusNotFound)
-		message := fmt.Sprintf("Deck: %v not found", id)
-		json.NewEncoder(w).Encode(APIResponse{
-			Message: message,
-		})
-		return
-	}
+// 	if deck == nil {
+// 		w.WriteHeader(http.StatusNotFound)
+// 		message := fmt.Sprintf("Deck: %v not found", id)
+// 		json.NewEncoder(w).Encode(APIResponse{
+// 			Message: message,
+// 		})
+// 		return
+// 	}
 
-	deck.Name = req.Name
+// 	deck.Name = req.Name
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(deck)
-}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	json.NewEncoder(w).Encode(deck)
+// }
 
-type createFlashcardInput struct {
-	Front string `json:"front" validate:"required"`
-	Back  string `json:"back" validate:"required"`
-}
+// type createFlashcardInput struct {
+// 	Front string `json:"front" validate:"required"`
+// 	Back  string `json:"back" validate:"required"`
+// }
 
-func CreateFlashcard(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	deckId := vars["deckId"]
+// func CreateFlashcard(w http.ResponseWriter, r *http.Request) {
+// 	vars := mux.Vars(r)
+// 	deckId := vars["deckId"]
 
-	var reqBody createFlashcardInput
-	json.NewDecoder(r.Body).Decode(&reqBody)
+// 	var reqBody createFlashcardInput
+// 	json.NewDecoder(r.Body).Decode(&reqBody)
 
-	validationErrors, err := ValidateRequestBody(reqBody)
+// 	validationErrors, err := ValidateRequestBody(reqBody)
 
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+// 	if err != nil {
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		return
+// 	}
 
-	if len(validationErrors) != 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(APIResponse{
-			Message: "Invalid data provided",
-			Errors:  validationErrors,
-		})
-		return
-	}
+// 	if len(validationErrors) != 0 {
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		json.NewEncoder(w).Encode(APIResponse{
+// 			Message: "Invalid data provided",
+// 			Errors:  validationErrors,
+// 		})
+// 		return
+// 	}
 
-	var deck = deckRepository.FindById(deckId)
+// 	var deck = deckRepository.FindById(deckId)
 
-	if deck == nil {
-		w.WriteHeader(http.StatusNotFound)
-		message := fmt.Sprintf("Deck: %v not found", deckId)
-		json.NewEncoder(w).Encode(APIResponse{
-			Message: message,
-		})
-		return
-	}
+// 	if deck == nil {
+// 		w.WriteHeader(http.StatusNotFound)
+// 		message := fmt.Sprintf("Deck: %v not found", deckId)
+// 		json.NewEncoder(w).Encode(APIResponse{
+// 			Message: message,
+// 		})
+// 		return
+// 	}
 
-	newFlashcard := Flashcard{
-		Id:     uuid.New().String(),
-		Front:  reqBody.Front,
-		Back:   reqBody.Back,
-		DeckId: deckId,
-	}
+// 	newFlashcard := Flashcard{
+// 		Id:     uuid.New().String(),
+// 		Front:  reqBody.Front,
+// 		Back:   reqBody.Back,
+// 		DeckID: deckId,
+// 	}
 
-	deck.Flashcards = append(deck.Flashcards, newFlashcard)
+// 	deck.Flashcards = append(deck.Flashcards, newFlashcard)
 
-	json.NewEncoder(w).Encode(newFlashcard)
-	w.WriteHeader(http.StatusCreated)
-}
+// 	json.NewEncoder(w).Encode(newFlashcard)
+// 	w.WriteHeader(http.StatusCreated)
+// }
