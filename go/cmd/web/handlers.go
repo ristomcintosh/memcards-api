@@ -4,47 +4,28 @@ import (
 	"encoding/json"
 	// "fmt"
 	"net/http"
-
 	// "github.com/google/uuid"
 	// "github.com/gorilla/mux"
-	"gorm.io/gorm"
 )
-
-var decks = []Deck{
-	{Name: "World Capitals"},
-	{Name: "Basic Portuguese"},
-}
-
-// var flashcards1 = []Flashcard{
-// 	{Front: "France", Back: "Paris", DeckID: "1"},
-// 	{Front: "Japan", Back: "Tokyo", DeckID: "1"},
-// 	{Front: "Italy", Back: "Rome", DeckID: "1"},
-// 	{Front: "Brazil", Back: "Brasilia", DeckID: "1"},
-// 	{Front: "Canada", Back: "Ottawa", DeckID: "1"},
-// }
-
-// var flashcards2 = []Flashcard{
-// 	{Front: "Hello", Back: "Olá", DeckID: "2"},
-// 	{Front: "Thank you", Back: "Obrigado", DeckID: "2"},
-// 	{Front: "Yes", Back: "Sim", DeckID: "2"},
-// 	{Front: "No", Back: "Não", DeckID: "2"},
-// 	{Front: "Goodbye", Back: "Adeus", DeckID: "2"},
-// }
-
-var deckRepository = Repository[Deck]{decks}
 
 type APIResponse struct {
 	Message string
 	Errors  []string
 }
 
-func GetDecks(db *gorm.DB) http.HandlerFunc {
+func (app *application) GetDecks() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		var decks []Deck
-		db.Model(&Deck{}).Preload("Flashcards").Find(&decks)
+
+		decks, dbErr := app.db.GetAllDecks()
+
+		if dbErr != nil {
+			app.errorLog.Print("something went with the db!")
+			return
+		}
+
 		err := json.NewEncoder(w).Encode(decks)
 
 		if err != nil {

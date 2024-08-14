@@ -9,7 +9,7 @@ import (
 func (app *application) routes() http.Handler {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/decks", GetDecks(&app.db)).Methods(http.MethodGet)
+	r.HandleFunc("/decks", app.GetDecks()).Methods(http.MethodGet)
 	// r.HandleFunc("/decks/{deckId}", GetDeck).Methods(http.MethodGet)
 	// r.HandleFunc("/decks", CreateDeck).Methods(http.MethodPost)
 	// r.HandleFunc("/decks/{deckId}", UpdateDeck).Methods(http.MethodPut)
