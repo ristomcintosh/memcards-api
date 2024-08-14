@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	// "fmt"
+	"fmt"
 	"net/http"
+
 	// "github.com/google/uuid"
-	// "github.com/gorilla/mux"
+	"github.com/gorilla/mux"
 )
 
 type APIResponse struct {
@@ -35,26 +36,30 @@ func (app *application) GetDecks() http.HandlerFunc {
 	}
 }
 
-// func GetDeck(w http.ResponseWriter, r *http.Request) {
-// 	vars := mux.Vars(r)
-// 	id := vars["deckId"]
+func (app *application) GetDeck(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["deckId"]
 
-// 	deck := deckRepository.FindById(id)
+	deck, dbErr := app.db.GetDeckByID(id)
 
-// 	if deck == nil {
-// 		w.WriteHeader(http.StatusNotFound)
-// 		message := fmt.Sprintf("Deck: %v not found", id)
-// 		w.Write([]byte(message))
-// 		return
-// 	}
+	if dbErr != nil {
+		app.serverError(w, dbErr)
+		return
+	}
 
-// 	err := json.NewEncoder(w).Encode(deck)
+	if deck == nil {
+		message := fmt.Sprintf("Deck: %v not found", id)
+		app.clientError(w, http.StatusNotFound, message)
+		return
+	}
 
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-// }
+	err := json.NewEncoder(w).Encode(deck)
+
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+}
 
 // type CreateDeckInput struct {
 // 	Name string `json:"name"`

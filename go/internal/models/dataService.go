@@ -11,3 +11,14 @@ func (ds *DataService) GetAllDecks() ([]Deck, error) {
 	result := ds.Model(&Deck{}).Preload("Flashcards").Find(&decks)
 	return decks, result.Error
 }
+
+func (ds *DataService) GetDeckByID(id string) (*Deck, error) {
+	var deck *Deck
+	result := ds.Model(&deck).Find(&deck, id)
+
+	if result.RowsAffected == 0 {
+		deck = nil
+	}
+
+	return deck, result.Error
+}
