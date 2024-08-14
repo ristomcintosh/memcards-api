@@ -22,14 +22,14 @@ func (app *application) GetDecks() http.HandlerFunc {
 		decks, dbErr := app.db.GetAllDecks()
 
 		if dbErr != nil {
-			app.errorLog.Print("something went with the db!")
+			app.serverError(w, dbErr)
 			return
 		}
 
 		err := json.NewEncoder(w).Encode(decks)
 
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			app.serverError(w, err)
 			return
 		}
 	}
