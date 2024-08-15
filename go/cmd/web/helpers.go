@@ -13,14 +13,10 @@ func (app *application) serverError(w http.ResponseWriter, err error) {
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
 
-func (app *application) clientError(w http.ResponseWriter, status int, errorMsg ...string) {
-	var msg string
+func (app *application) clientError(w http.ResponseWriter, status int) {
+	http.Error(w, http.StatusText(status), status)
+}
 
-	if errorMsg[0] != "" {
-		msg = errorMsg[0]
-	} else {
-		msg = http.StatusText(status)
-	}
-
-	http.Error(w, msg, status)
+func (app *application) notFound(w http.ResponseWriter) {
+	app.clientError(w, http.StatusNotFound)
 }

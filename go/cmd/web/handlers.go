@@ -2,7 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
+	"memcards-api/internal/models"
 	"net/http"
 
 	// "github.com/google/uuid"
@@ -43,13 +44,11 @@ func (app *application) GetDeck(w http.ResponseWriter, r *http.Request) {
 	deck, dbErr := app.db.GetDeckByID(id)
 
 	if dbErr != nil {
-		app.serverError(w, dbErr)
-		return
-	}
-
-	if deck == nil {
-		message := fmt.Sprintf("Deck: %v not found", id)
-		app.clientError(w, http.StatusNotFound, message)
+		if errors.Is(dbErr, models.ErrNoRecord) {
+			app.notFound(w)
+		} else {
+			app.serverError(w, dbErr)
+		}
 		return
 	}
 

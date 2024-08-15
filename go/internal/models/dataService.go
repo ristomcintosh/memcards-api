@@ -1,6 +1,10 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"errors"
+
+	"gorm.io/gorm"
+)
 
 type DataService struct {
 	*gorm.DB
@@ -14,11 +18,16 @@ func (ds *DataService) GetAllDecks() ([]Deck, error) {
 
 func (ds *DataService) GetDeckByID(id string) (*Deck, error) {
 	var deck *Deck
-	result := ds.Model(&deck).Find(&deck, id)
 
-	if result.RowsAffected == 0 {
-		deck = nil
+	err := ds.First(&deck, id).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNoRecord
+		} else {
+			return nil, err
+		}
 	}
 
-	return deck, result.Error
+	return deck, nil
 }
