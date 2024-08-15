@@ -11,7 +11,7 @@ import (
 )
 
 type application struct {
-	db       *models.DataService
+	db       models.DataService
 	infoLog  *log.Logger
 	errorLog *log.Logger
 }
@@ -43,7 +43,7 @@ var decks = []models.Deck{
 	{Name: "Basic Portuguese"},
 }
 
-func dbSetup() (*models.DataService, error) {
+func dbSetup() (*models.GormOrm, error) {
 	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	if err != nil {
 		return nil, err
@@ -76,5 +76,5 @@ func dbSetup() (*models.DataService, error) {
 
 	db.Create(portugueseBasicCards)
 
-	return &models.DataService{DB: db}, nil
+	return &models.GormOrm{DB: db}, nil
 }

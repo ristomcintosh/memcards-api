@@ -6,20 +6,25 @@ import (
 	"gorm.io/gorm"
 )
 
-type DataService struct {
+type DataService interface {
+	GetAllDecks() ([]Deck, error)
+	GetDeckByID(id string) (*Deck, error)
+}
+
+type GormOrm struct {
 	*gorm.DB
 }
 
-func (ds *DataService) GetAllDecks() ([]Deck, error) {
+func (orm *GormOrm) GetAllDecks() ([]Deck, error) {
 	var decks []Deck
-	result := ds.Model(&Deck{}).Preload("Flashcards").Find(&decks)
+	result := orm.Model(&Deck{}).Preload("Flashcards").Find(&decks)
 	return decks, result.Error
 }
 
-func (ds *DataService) GetDeckByID(id string) (*Deck, error) {
-	var deck *Deck
+func (orm *GormOrm) GetDeckByID(id string) (*Deck, error) {
+	var deck Deck
 
-	err := ds.First(&deck, id).Error
+	err := orm.First(&deck, id).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -29,5 +34,5 @@ func (ds *DataService) GetDeckByID(id string) (*Deck, error) {
 		}
 	}
 
-	return deck, nil
+	return &deck, nil
 }
