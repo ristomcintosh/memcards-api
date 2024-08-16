@@ -49,6 +49,7 @@ func dbSetup() (*data.GormOrm, error) {
 		return nil, err
 	}
 
+	// TODO move to a "seed" script
 	db.Exec("DROP TABLE decks")
 	db.Exec("DROP TABLE flashcards")
 	db.AutoMigrate(data.Deck{}, data.Flashcard{})

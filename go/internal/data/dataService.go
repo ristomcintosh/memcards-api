@@ -11,6 +11,7 @@ type DataService interface {
 	GetDeckByID(id string) (*Deck, error)
 	CreateDeck(name string) (*Deck, error)
 	UpdateDeck(id uint, name string) (*Deck, error)
+	CreateFlashcard(deckId uint, front, back string) (*Flashcard, error)
 }
 
 type GormOrm struct {
@@ -60,4 +61,16 @@ func (orm *GormOrm) UpdateDeck(id uint, name string) (*Deck, error) {
 	}
 
 	return &deck, nil
+}
+
+func (orm *GormOrm) CreateFlashcard(deckId uint, front, back string) (*Flashcard, error) {
+	flashcard := Flashcard{Front: front, Back: back, DeckID: deckId}
+
+	err := orm.DB.Create(&flashcard).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &flashcard, nil
 }

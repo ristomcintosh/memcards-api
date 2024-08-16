@@ -13,7 +13,7 @@ func (app *application) routes() http.Handler {
 	r.HandleFunc("/decks/{deckId}", app.GetDeck).Methods(http.MethodGet)
 	r.HandleFunc("/decks", app.CreateDeck).Methods(http.MethodPost)
 	r.HandleFunc("/decks/{deckId}", app.UpdateDeck).Methods(http.MethodPut)
-	// r.HandleFunc("/decks/{deckId}/flashcards", CreateFlashcard).Methods(http.MethodPost)
+	r.HandleFunc("/decks/{deckId}/flashcards", app.CreateFlashcard).Methods(http.MethodPost)
 
 	return r
 }
