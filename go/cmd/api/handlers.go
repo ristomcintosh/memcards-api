@@ -15,26 +15,24 @@ type APIResponse struct {
 	Errors  []string
 }
 
-func (app *application) GetDecks() http.HandlerFunc {
+func (app *application) GetDecks(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
+	decks, dbErr := app.db.GetAllDecks()
 
-		decks, dbErr := app.db.GetAllDecks()
-
-		if dbErr != nil {
-			app.serverError(w, dbErr)
-			return
-		}
-
-		err := json.NewEncoder(w).Encode(decks)
-
-		if err != nil {
-			app.serverError(w, err)
-			return
-		}
+	if dbErr != nil {
+		app.serverError(w, dbErr)
+		return
 	}
+
+	err := json.NewEncoder(w).Encode(decks)
+
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
 }
 
 func (app *application) GetDeck(w http.ResponseWriter, r *http.Request) {
@@ -60,33 +58,30 @@ func (app *application) GetDeck(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// type CreateDeckInput struct {
-// 	Name string `json:"name"`
-// }
+type CreateDeckInput struct {
+	Name string `json:"name"`
+}
 
-// func CreateDeck(w http.ResponseWriter, r *http.Request) {
-// 	var req CreateDeckInput
+func (app *application) CreateDeck(w http.ResponseWriter, r *http.Request) {
 
-// 	json.NewDecoder(r.Body).Decode(&req)
+	var input struct {
+		Name string `json:"name"`
+	}
 
-// 	if req.Name == "" {
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		w.Write([]byte("name is required"))
-// 		return
-// 	}
+	json.NewDecoder(r.Body).Decode(&input)
 
-// 	newDeck := Deck{
-// 		Id:         uuid.New().String(),
-// 		Name:       req.Name,
-// 		Flashcards: []Flashcard{},
-// 	}
+	// if req.Name == "" {
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	w.Write([]byte("name is required"))
+	// 	return
+	// }
 
-// 	deckRepository.Create(newDeck)
+	newDeck, _ := app.db.CreateDeck(input.Name)
 
-// 	w.Header().Set("Content-Type", "application/json")
-// 	json.NewEncoder(w).Encode(newDeck)
-// 	w.WriteHeader(http.StatusCreated)
-// }
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(newDeck)
+	w.WriteHeader(http.StatusCreated)
+}
 
 // type UpdateDeckInput struct {
 // 	Name string `json:"name"`

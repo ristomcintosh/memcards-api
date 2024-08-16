@@ -9,6 +9,7 @@ import (
 type DataService interface {
 	GetAllDecks() ([]Deck, error)
 	GetDeckByID(id string) (*Deck, error)
+	CreateDeck(name string) (*Deck, error)
 }
 
 type GormOrm struct {
@@ -35,4 +36,15 @@ func (orm *GormOrm) GetDeckByID(id string) (*Deck, error) {
 	}
 
 	return &deck, nil
+}
+
+func (orm *GormOrm) CreateDeck(name string) (*Deck, error) {
+	deck := &Deck{Name: name}
+	err := orm.DB.Create(&deck).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return deck, nil
 }
