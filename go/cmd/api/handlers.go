@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"memcards-api/internal/models"
+	"memcards-api/internal/data"
 	"net/http"
 
 	// "github.com/google/uuid"
@@ -44,7 +44,7 @@ func (app *application) GetDeck(w http.ResponseWriter, r *http.Request) {
 	deck, dbErr := app.db.GetDeckByID(id)
 
 	if dbErr != nil {
-		if errors.Is(dbErr, models.ErrNoRecord) {
+		if errors.Is(dbErr, data.ErrNoRecord) {
 			app.notFound(w)
 		} else {
 			app.serverError(w, dbErr)

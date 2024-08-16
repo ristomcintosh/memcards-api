@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"memcards-api/internal/models"
+	"memcards-api/internal/data"
 	"net/http"
 	"os"
 
@@ -11,7 +11,7 @@ import (
 )
 
 type application struct {
-	db       models.DataService
+	db       data.DataService
 	infoLog  *log.Logger
 	errorLog *log.Logger
 }
@@ -38,12 +38,12 @@ func main() {
 	log.Fatal(http.ListenAndServe(":5757", handlers))
 }
 
-var decks = []models.Deck{
+var decks = []data.Deck{
 	{Name: "World Capitals"},
 	{Name: "Basic Portuguese"},
 }
 
-func dbSetup() (*models.GormOrm, error) {
+func dbSetup() (*data.GormOrm, error) {
 	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	if err != nil {
 		return nil, err
@@ -51,12 +51,12 @@ func dbSetup() (*models.GormOrm, error) {
 
 	db.Exec("DROP TABLE decks")
 	db.Exec("DROP TABLE flashcards")
-	db.AutoMigrate(models.Deck{}, models.Flashcard{})
+	db.AutoMigrate(data.Deck{}, data.Flashcard{})
 
 	db.Create(&decks)
 
 	worldCapitals := decks[0]
-	worldCapitalsCards := []models.Flashcard{
+	worldCapitalsCards := []data.Flashcard{
 		{Front: "France", Back: "Paris", DeckID: worldCapitals.ID},
 		{Front: "Japan", Back: "Tokyo", DeckID: worldCapitals.ID},
 		{Front: "Italy", Back: "Rome", DeckID: worldCapitals.ID},
@@ -66,7 +66,7 @@ func dbSetup() (*models.GormOrm, error) {
 	db.Create(worldCapitalsCards)
 
 	portugueseBasic := decks[1]
-	portugueseBasicCards := []models.Flashcard{
+	portugueseBasicCards := []data.Flashcard{
 		{Front: "Hello", Back: "Olá", DeckID: portugueseBasic.ID},
 		{Front: "Thank you", Back: "Obrigado", DeckID: portugueseBasic.ID},
 		{Front: "Yes", Back: "Sim", DeckID: portugueseBasic.ID},
@@ -76,5 +76,5 @@ func dbSetup() (*models.GormOrm, error) {
 
 	db.Create(portugueseBasicCards)
 
-	return &models.GormOrm{DB: db}, nil
+	return &data.GormOrm{DB: db}, nil
 }
