@@ -11,6 +11,7 @@ type Flashcard struct {
 
 type Deck struct {
 	gorm.Model
+	ID         uint   `gorm:"primarykey"`
 	Name       string `json:"name"`
 	Flashcards []Flashcard
 }

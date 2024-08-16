@@ -5,6 +5,7 @@ import (
 	"errors"
 	"memcards-api/internal/data"
 	"net/http"
+	"strconv"
 
 	// "github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -83,40 +84,37 @@ func (app *application) CreateDeck(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-// type UpdateDeckInput struct {
-// 	Name string `json:"name"`
-// }
+func (app *application) UpdateDeck(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Name string `json:"name"`
+	}
 
-// func UpdateDeck(w http.ResponseWriter, r *http.Request) {
-// 	var req UpdateDeckInput
+	json.NewDecoder(r.Body).Decode(&input)
 
-// 	json.NewDecoder(r.Body).Decode(&req)
+	if input.Name == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("name is required"))
+		return
+	}
 
-// 	if req.Name == "" {
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		w.Write([]byte("name is required"))
-// 		return
-// 	}
+	vars := mux.Vars(r)
+	// TODO handle error
+	id, _ := strconv.Atoi(vars["deckId"])
 
-// 	vars := mux.Vars(r)
-// 	id := vars["deckId"]
+	deck, _ := app.db.UpdateDeck(uint(id), input.Name)
 
-// 	deck := deckRepository.FindById(id)
+	// if deck == nil {
+	// 	w.WriteHeader(http.StatusNotFound)
+	// 	message := fmt.Sprintf("Deck: %v not found", id)
+	// 	json.NewEncoder(w).Encode(APIResponse{
+	// 		Message: message,
+	// 	})
+	// 	return
+	// }
 
-// 	if deck == nil {
-// 		w.WriteHeader(http.StatusNotFound)
-// 		message := fmt.Sprintf("Deck: %v not found", id)
-// 		json.NewEncoder(w).Encode(APIResponse{
-// 			Message: message,
-// 		})
-// 		return
-// 	}
-
-// 	deck.Name = req.Name
-
-// 	w.Header().Set("Content-Type", "application/json")
-// 	json.NewEncoder(w).Encode(deck)
-// }
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(deck)
+}
 
 // type createFlashcardInput struct {
 // 	Front string `json:"front" validate:"required"`
