@@ -32,10 +32,14 @@ func main() {
 		errorLog: errorLog,
 	}
 
-	handlers := app.routes()
+	srv := &http.Server{
+		Addr:     ":5757",
+		ErrorLog: errorLog,
+		Handler:  app.routes(),
+	}
 
 	infoLog.Println("listening on port 5757")
-	log.Fatal(http.ListenAndServe(":5757", handlers))
+	log.Fatal(srv.ListenAndServe())
 }
 
 var decks = []data.Deck{

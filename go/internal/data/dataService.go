@@ -42,7 +42,7 @@ func (orm *GormOrm) GetDeckByID(id string) (*Deck, error) {
 
 func (orm *GormOrm) CreateDeck(name string) (*Deck, error) {
 	deck := Deck{Name: name}
-	err := orm.DB.Create(&deck).Error
+	err := orm.Create(&deck).Error
 
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (orm *GormOrm) CreateDeck(name string) (*Deck, error) {
 func (orm *GormOrm) UpdateDeck(id uint, name string) (*Deck, error) {
 	deck := Deck{ID: id}
 
-	err := orm.DB.Model(&deck).Update("name", name).Error
+	err := orm.Model(&deck).Update("name", name).Error
 
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (orm *GormOrm) UpdateDeck(id uint, name string) (*Deck, error) {
 func (orm *GormOrm) CreateFlashcard(deckId uint, front, back string) (*Flashcard, error) {
 	flashcard := Flashcard{Front: front, Back: back, DeckID: deckId}
 
-	err := orm.DB.Create(&flashcard).Error
+	err := orm.Create(&flashcard).Error
 
 	if err != nil {
 		return nil, err
