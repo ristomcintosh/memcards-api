@@ -1,17 +1,22 @@
 package data
 
-import "gorm.io/gorm"
-
-type Flashcard struct {
-	gorm.Model
-	Front  string `json:"front"`
-	Back   string `json:"back"`
-	DeckID uint   `json:"deckId"`
-}
+import (
+	"time"
+)
 
 type Deck struct {
-	gorm.Model
-	ID         uint   `gorm:"primarykey"`
-	Name       string `json:"name"`
-	Flashcards []Flashcard
+	ID         uint        `json:"id"`
+	Name       string      `json:"name"`
+	Flashcards []Flashcard `json:"flashcards"`
+	CreatedAt  time.Time   `json:"-"`
+	UpdatedAt  time.Time   `json:"-"`
+}
+
+type Flashcard struct {
+	ID        uint      `json:"id"`
+	Front     string    `json:"front"`
+	Back      string    `json:"back"`
+	DeckID    uint      `json:"deckId"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 }
