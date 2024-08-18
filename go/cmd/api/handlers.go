@@ -1,31 +1,23 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
-	"github.com/gorilla/mux"
 	"memcards-api/internal/data"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
-type APIResponse struct {
-	Message string
-	Errors  []string
-}
-
 func (app *application) GetDecks(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	decks, err := app.db.GetAllDecks()
 
-	decks, dbErr := app.db.GetAllDecks()
-
-	if dbErr != nil {
-		app.serverError(w, dbErr)
+	if err != nil {
+		app.serverError(w, err)
 		return
 	}
 
-	err := json.NewEncoder(w).Encode(decks)
+	err = app.writeJSON(w, http.StatusOK, envelope{"decks": decks})
 
 	if err != nil {
 		app.serverError(w, err)
@@ -38,27 +30,23 @@ func (app *application) GetDeck(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["deckId"]
 
-	deck, dbErr := app.db.GetDeckByID(id)
+	deck, err := app.db.GetDeckByID(id)
 
-	if dbErr != nil {
-		if errors.Is(dbErr, data.ErrNoRecord) {
+	if err != nil {
+		if errors.Is(err, data.ErrNoRecord) {
 			app.notFound(w)
 		} else {
-			app.serverError(w, dbErr)
+			app.serverError(w, err)
 		}
 		return
 	}
 
-	err := json.NewEncoder(w).Encode(deck)
+	err = app.writeJSON(w, http.StatusOK, envelope{"deck": deck})
 
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
-}
-
-type CreateDeckInput struct {
-	Name string `json:"name"`
 }
 
 func (app *application) CreateDeck(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +55,12 @@ func (app *application) CreateDeck(w http.ResponseWriter, r *http.Request) {
 		Name string `json:"name"`
 	}
 
-	json.NewDecoder(r.Body).Decode(&input)
+	err := app.readJSON(w, r, &input)
+
+	// if err != nil {
+	// 	app.badRequestResponse(w, err)
+	// 	return
+	// }
 
 	// if req.Name == "" {
 	// 	w.WriteHeader(http.StatusBadRequest)
@@ -77,9 +70,12 @@ func (app *application) CreateDeck(w http.ResponseWriter, r *http.Request) {
 
 	newDeck, _ := app.db.CreateDeck(input.Name)
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(newDeck)
-	w.WriteHeader(http.StatusCreated)
+	err = app.writeJSON(w, http.StatusCreated, envelope{"deck": newDeck})
+
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
 }
 
 func (app *application) UpdateDeck(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +83,12 @@ func (app *application) UpdateDeck(w http.ResponseWriter, r *http.Request) {
 		Name string `json:"name"`
 	}
 
-	json.NewDecoder(r.Body).Decode(&input)
+	err := app.readJSON(w, r, &input)
+
+	// if err != nil {
+	// 	app.badRequestResponse(w, err)
+	// 	return
+	// }
 
 	if input.Name == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -110,8 +111,12 @@ func (app *application) UpdateDeck(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(deck)
+	err = app.writeJSON(w, http.StatusOK, envelope{"deck": deck})
+
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
 }
 
 func (app *application) CreateFlashcard(w http.ResponseWriter, r *http.Request) {
@@ -122,7 +127,12 @@ func (app *application) CreateFlashcard(w http.ResponseWriter, r *http.Request) 
 		Front string `json:"front"`
 		Back  string `json:"back"`
 	}
-	json.NewDecoder(r.Body).Decode(&input)
+	err := app.readJSON(w, r, &input)
+
+	// if err != nil {
+	// 	app.badRequestResponse(w, err)
+	// 	return
+	// }
 
 	newFlashcard, _ := app.db.CreateFlashcard(uint(deckId), input.Front, input.Back)
 
@@ -135,6 +145,10 @@ func (app *application) CreateFlashcard(w http.ResponseWriter, r *http.Request) 
 	// 	return
 	// }
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(newFlashcard)
+	err = app.writeJSON(w, http.StatusCreated, envelope{"flashcard": newFlashcard})
+
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
 }
