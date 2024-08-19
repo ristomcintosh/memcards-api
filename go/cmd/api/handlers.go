@@ -13,14 +13,14 @@ func (app *application) GetDecks(w http.ResponseWriter, r *http.Request) {
 	decks, err := app.db.GetAllDecks()
 
 	if err != nil {
-		app.serverError(w, err)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"decks": decks})
 
 	if err != nil {
-		app.serverError(w, err)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 
@@ -34,9 +34,9 @@ func (app *application) GetDeck(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if errors.Is(err, data.ErrNoRecord) {
-			app.notFound(w)
+			app.notFoundResponse(w, r)
 		} else {
-			app.serverError(w, err)
+			app.serverErrorResponse(w, r, err)
 		}
 		return
 	}
@@ -44,7 +44,7 @@ func (app *application) GetDeck(w http.ResponseWriter, r *http.Request) {
 	err = app.writeJSON(w, http.StatusOK, envelope{"deck": deck})
 
 	if err != nil {
-		app.serverError(w, err)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 }
@@ -57,10 +57,10 @@ func (app *application) CreateDeck(w http.ResponseWriter, r *http.Request) {
 
 	err := app.readJSON(w, r, &input)
 
-	// if err != nil {
-	// 	app.badRequestResponse(w, err)
-	// 	return
-	// }
+	if err != nil {
+		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	// if req.Name == "" {
 	// 	w.WriteHeader(http.StatusBadRequest)
@@ -73,7 +73,7 @@ func (app *application) CreateDeck(w http.ResponseWriter, r *http.Request) {
 	err = app.writeJSON(w, http.StatusCreated, envelope{"deck": newDeck})
 
 	if err != nil {
-		app.serverError(w, err)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 }
@@ -85,10 +85,10 @@ func (app *application) UpdateDeck(w http.ResponseWriter, r *http.Request) {
 
 	err := app.readJSON(w, r, &input)
 
-	// if err != nil {
-	// 	app.badRequestResponse(w, err)
-	// 	return
-	// }
+	if err != nil {
+		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	if input.Name == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -114,7 +114,7 @@ func (app *application) UpdateDeck(w http.ResponseWriter, r *http.Request) {
 	err = app.writeJSON(w, http.StatusOK, envelope{"deck": deck})
 
 	if err != nil {
-		app.serverError(w, err)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 }
@@ -127,12 +127,13 @@ func (app *application) CreateFlashcard(w http.ResponseWriter, r *http.Request) 
 		Front string `json:"front"`
 		Back  string `json:"back"`
 	}
+
 	err := app.readJSON(w, r, &input)
 
-	// if err != nil {
-	// 	app.badRequestResponse(w, err)
-	// 	return
-	// }
+	if err != nil {
+		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	newFlashcard, _ := app.db.CreateFlashcard(uint(deckId), input.Front, input.Back)
 
@@ -148,7 +149,7 @@ func (app *application) CreateFlashcard(w http.ResponseWriter, r *http.Request) 
 	err = app.writeJSON(w, http.StatusCreated, envelope{"flashcard": newFlashcard})
 
 	if err != nil {
-		app.serverError(w, err)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 }
