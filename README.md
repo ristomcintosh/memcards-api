@@ -1,10 +1,8 @@
 # Memcards API
 
-This repository contains **multiple implementations** of the same API using different programming languages and frameworks. It serves as a playground for learning and experimenting with new technologies.
-
 ## API Endpoints
 
-All implementations follow the same API specification for [Memcards (a simple flashcard app)](https://github.com/ristomcintosh/memcards-v2). The endpoints are as follows:
+Follows the API specification for [Memcards (a simple flashcard app)](https://github.com/ristomcintosh/memcards-v2). The endpoints are as follows:
 
 ### Decks
 
